@@ -25,7 +25,7 @@ echo "current dir: $(pwd)"
 echo "folder contents"
 ls -la
 
-if [ -f "go.mod" ]; then
+if [ ! -f "go.mod" ]; then
     echo "go.mod not found"
     exit 1
 fi
