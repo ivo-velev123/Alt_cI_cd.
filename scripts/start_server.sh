@@ -22,6 +22,8 @@ echo "go version: $($GO_CMD version)"
 cd /var/www/myapp
 
 echo "current dir: $(pwd)"
+echo "folder contents"
+ls -la
 
 if [ -f "go.mod" ]; then
     echo "go.mod not found"
