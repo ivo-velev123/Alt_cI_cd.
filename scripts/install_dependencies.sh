@@ -11,11 +11,21 @@ else
     echo "Installing Go"
 
     cd /tmp
+
+    rm -f go1.21.5.linux-amd64.tar.gz
+
     wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
 
     rm -rf /usr/local/go
 
     tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+
+    if [ -f "usr/local/go/bin/go"]; then
+        echo "go installed successfully"
+    else
+        echo "go install failed"
+        exit 1
+    fi
 
     rm -f go1.21.5.linux-amd64.tar.gz
 

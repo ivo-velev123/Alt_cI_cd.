@@ -1,50 +1,58 @@
 #!/bin/bash
-set -e
-
 echo "starting deployment"
 
-export PATH=$PATH
+export PATH=$PATH:/usr/local/go/bin:/usr/bin:/bin
 export GOPATH=/home/ec2-user/go
 
-if ! command -v &> /dev/null; then
-    echo "Go command not found after setting PATH"
-    echo "Path is: $PATH"
+if [ -f "/usr/local/bin/go" ]; then
+    echo "go binary found"
+    GO_CMD="usr/local/bin/go"
+elif command -v go &> /dev/null; then
+    echo "go found in path"
+    GO_CMD="go"
+else
+    echo "go isn't installed"
+    ls -la /usr/local/go/bin || echo "go dir doesn't exist"
+    echo "current path: $PATH"
+    exit 1
 fi
 
-echo "Go version: $(go version)"
+echo "go version: $($GO_CMD version)"
 
 cd /var/www/myapp
 
-if [! -f "go.mod"]; then
+echo "current dir: $(pwd)"
+
+if [ -f "go.mod" ]; then
     echo "go.mod not found"
     exit 1
 fi
 
-echo "downloading go dependencies"
-go mod download
+echo "downloading deps"
+$GO_CMD mod download
 
-echo "building go deps"
-go build -o myapp .
+echo "building app"
+$GO_CMD build -o myapp .
 
 chmod +x myapp
+chown ec2-user:ec2-user myapp
 
-chown ec2-user:ec2-user my-app
+echo "build completed"
 
-echo "Build completed successfully"
-
+echo "stopping old instance"
 pkill -f myapp || true
 sleep 2
 
-echo "starting application"
+echo "starting app"
 nohup ./myapp > /var/log/myapp.log 2>&1 &
 
 sleep 3
 
 if pgrep -f myapp > /dev/null; then
-    echo "Application started!"
+    echo "app started!"
     echo "PID: $(pgrep -f myapp)"
 else
     echo "failed to start"
-    tail -20 /var/log/myapp.log
+    tail -20 /var/log/myapp.log 2>&1 || echo "no log found"
     exit 1
 fi
