@@ -1,17 +1,30 @@
 #!/bin/bash
+set -e
+
+echo "Starting installation"
 
 yum update -y
 
-cd /tmp
+if [ -f "usr/local/go/bin/go" ]; then
+    echo "Go is already installed"
+else
+    echo "Installing Go"
 
-wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
-rm -rf /usr/local/go
-tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+    cd /tmp
+    wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
 
-if ! grep -q "/usr/local/go/bin" /etc/profile; then
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> etc/profile
+    rm -rf /usr/local/go
+
+    tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+
+    rm -f go1.21.5.linux-amd64.tar.gz
+
+    echo "Go installed"
 fi
 
-export PATH=$PATH:usr/local/go/bin
+echo "setting up app dir"
 
-go version
+mkdir -p /var/www/myapp
+chown -R ec2-user:ec2-user /var/www/myapp
+
+echo "Completed"
